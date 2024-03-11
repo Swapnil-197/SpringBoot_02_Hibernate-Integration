@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sb.pojo.Student;
+import com.sb.util.HibernateUtil;
 
 @RestController
 @RequestMapping("/student")
@@ -52,6 +55,16 @@ public class StudentController {
 	public Student addStudent(@RequestBody Student student) {
 		System.out.println(student);
 		//hibernate code to store into database
+		try(Session session = HibernateUtil.getMySqlConnection().openSession()){
+		Transaction tx = session.beginTransaction();
+		student.setName(student.getName());
+		student.setCourse(student.getCourse());
+		session.persist(student);
+		tx.commit();
+		}catch(Exception e) {
+			System.out.println("Unable to add into Database");
+			System.out.println(e);
+		}
 		return student;
 	}
 	
@@ -64,9 +77,10 @@ public class StudentController {
 	}
 	
 	@PostMapping(path = "/getStudentByIdRP")
-	public Integer getStudentByIdRP(@RequestParam(name="studentId")Integer studentId) {
+	public Integer getStudentByIdRP(@RequestParam(name="studentId")Integer studentId,
+			@RequestParam(name = "studentName",required = false,defaultValue = "NA")String studentName) {
 		System.out.println(studentId);
-		//hibernate code to store into database
+		System.out.println(studentName);
 		return studentId;
 	}
 	
